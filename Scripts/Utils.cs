@@ -17,6 +17,18 @@ public class Utils {
         }
         return _instance;
     }
+
+    public static Utils I
+    {
+        get
+        {
+            if (_instance == null)
+            {
+                _instance = new Utils();
+            }
+            return _instance;
+        }
+    }
     
     public float Rand() {
         return Random.Range(0, 1f);

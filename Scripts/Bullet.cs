@@ -8,13 +8,14 @@ public class Bullet : MonoBehaviour, IPoolable
 {
     public Rigidbody rb;
     public float life = 99f;
+    public double Damage = 1;
 
     void OnCollisionEnter (Collision other) {
         life -= 1;
     }
     // Start is called before the first frame update
     void Start() {
-        
+        rb.sleepThreshold = 1f;
     }
 
     // Update is called once per frame
@@ -29,7 +30,7 @@ public class Bullet : MonoBehaviour, IPoolable
     }
 
     bool NeedRecycle() {
-        return life <= 0 || Math.Abs(transform.position.z) >= 15;
+        return life <= 0 || Math.Abs(transform.position.z) >= 15; // && rb.velocity.magnitude < 0.5;
     }
 
     public void ApplyForce(Vector3 force) {

@@ -1,36 +1,21 @@
-
 using UnityEngine;
 using QFramework;
-using UniRx;
-using System.Collections.Generic;
-using System;
+using System.Collections;
 
-
-public class  BulletPool : MonoBehaviour {
-    List<Bullet> mObjList = new List<Bullet>();
-
-    private void Start()
-    {
-        this.Repeat()
-            .Until(() => { return Input.GetKeyDown(KeyCode.Space); })
-            .Event(() =>
-            {   
-                Log.I("util, event space");
-                var temp = SafeObjectPool<Bullet>.Instance.Allocate();
-                mObjList.Add(temp);
-            })
-            .Begin();
-
-        Observable.EveryUpdate()
-            .Where(x => Input.GetKeyDown(KeyCode.C) && mObjList.Count > 0)
-            .Subscribe(_ => {
-                Log.I("C");
-                SafeObjectPool<Bullet>.Instance.Recycle(mObjList[0]); 
-                mObjList.RemoveAt(0); 
-                Debug.Log("回收"); 
-            });
-
+public class BulletPool : Singleton<BulletPool> {
+    public SimpleObjectPool<Bullet> bp; 
+    public GameObject prefab;
+    private BulletPool() {
+        prefab = (GameObject)Resources.Load("Prefabs/Bullet", typeof(GameObject));
+        bp = new SimpleObjectPool<Bullet>(() => {
+            var bullet = ((GameObject)GameObject.Instantiate(prefab)).GetComponent<Bullet>();
+            bullet.gameObject.SetActive(false);
+            return bullet;
+        }, (Bullet bullet) => {
+            bullet.gameObject.SetActive(false);
+            var tr = bullet.gameObject.GetComponent<TrailRenderer>() as TrailRenderer;
+            tr.Clear();
+            bullet.rb.Sleep();
+        }, 50);
     }
-
-
 }

@@ -16,11 +16,13 @@ namespace QFramework
         private float                   mDelayTime;
         private bool                    mIsEnable = true;
         private int                     mRepeatCount;
+        private int                     mRepeatCountSource;
         private float                   mSortScore;
 		private Action<int>                mCallback;
         private int                     mCallbackTick;
         private int                     mHeapIndex;
         private bool                    mIsCache;
+        private bool                    mPause = false;
 
 		public static TimeItem Allocate(Action<int> callback, float delayTime, int repeatCount = 1)
         {
@@ -35,10 +37,15 @@ namespace QFramework
             mCallback = callback;
             mDelayTime = delayTime;
             mRepeatCount = repeatCount;
+            mRepeatCountSource = repeatCount;
+            mPause = false;
         }
 
         public void OnTimeTick()
         {
+            if (mPause) {
+                return;
+            }
             if (mCallback != null)
             {
                 mCallback(++mCallbackTick);
@@ -92,6 +99,23 @@ namespace QFramework
                 mIsEnable = false;
                 mCallback = null;
             }
+        }
+
+        public void Pause()
+        {
+            mPause = true;
+        }
+
+        public void Start() {
+            mPause = false;
+        }
+
+        public void Stop() {
+            mRepeatCount = 0;
+        }
+
+        public void Restart() {
+            Set(mCallback, mDelayTime, mRepeatCountSource);
         }
 
         public bool NeedRepeat()
